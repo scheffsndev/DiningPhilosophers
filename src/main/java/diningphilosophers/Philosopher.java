@@ -1,6 +1,11 @@
 package diningphilosophers;
 
+import java.time.Duration;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class Philosopher extends Thread {
 	
@@ -10,9 +15,13 @@ public class Philosopher extends Thread {
 	private static final int EAT_TIME_MAX_MS = 5000;
 	
 	private static final Random random = new Random();
+	private static ScheduledExecutorService execService = Executors.newSingleThreadScheduledExecutor();
 	
 	private final Fork leftFork;
 	private final Fork rightFork;
+	
+	private boolean alive = true;
+	private ScheduledFuture<?> starvationFuture;
 	
 	public Philosopher(Fork leftFork, Fork rightFork) {
 		this.leftFork = leftFork;
@@ -34,12 +43,22 @@ public class Philosopher extends Thread {
 			releaseForks();
 		}
 		
+		if (starvationFuture != null) {
+			starvationFuture.cancel(false);
+		}
+		
 		System.out.println(this.toString() + " just finished eating.");
 	}
 
 	private void think() {
 		
 		System.out.println(this.toString() + " just started thinking.");
+		
+		Duration starvationDuration = this.getStarvationDuration();
+		starvationFuture = execService.schedule(() -> {
+			System.out.println("WARNING: " + this.toString() + " just died on starvation!");
+			alive = false;
+		}, starvationDuration.toMillis(), TimeUnit.SECONDS);
 		
 		int thinkTime = getRandInt(THINK_TIME_MIN_MS, THINK_TIME_MAX_MS);
 		try {
@@ -63,6 +82,10 @@ public class Philosopher extends Thread {
 		System.out.println(this.toString() + " just acquired right fork.");
 	}
 	
+	private Duration getStarvationDuration() {
+		return Duration.ofMillis((long) ((EAT_TIME_MAX_MS + THINK_TIME_MAX_MS) * 1.25));
+	}
+	
 	private void releaseForks() {
 		leftFork.put();
 		rightFork.put();
@@ -74,7 +97,7 @@ public class Philosopher extends Thread {
 
 	@Override
 	public void run() {
-		while(true) {
+		while(alive) {
 			this.think();
 			this.eat();
 		}
