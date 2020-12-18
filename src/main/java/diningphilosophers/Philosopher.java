@@ -58,7 +58,7 @@ public class Philosopher extends Thread {
 		starvationFuture = execService.schedule(() -> {
 			System.out.println("WARNING: " + this.toString() + " just died on starvation!");
 			alive = false;
-		}, starvationDuration.toMillis(), TimeUnit.SECONDS);
+		}, starvationDuration.toMillis(), TimeUnit.MILLISECONDS);
 		
 		int thinkTime = getRandInt(THINK_TIME_MIN_MS, THINK_TIME_MAX_MS);
 		try {
