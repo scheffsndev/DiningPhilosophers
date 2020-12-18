@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Philosopher extends Thread {
 
@@ -20,7 +21,7 @@ public class Philosopher extends Thread {
 	private final Fork leftFork;
 	private final Fork rightFork;
 
-	private boolean alive = true;
+	private AtomicBoolean aliveBoolean = new AtomicBoolean(true);
 	private ScheduledFuture<?> starvationFuture;
 
 	public Philosopher(Fork leftFork, Fork rightFork) {
@@ -100,7 +101,7 @@ public class Philosopher extends Thread {
 		Duration starvationDuration = this.getStarvationDuration();
 		starvationFuture = execService.schedule(() -> {
 			System.out.println("WARNING: " + this.toString() + " just died on starvation!");
-			alive = false;
+			aliveBoolean.set(false);
 		}, starvationDuration.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
@@ -112,7 +113,7 @@ public class Philosopher extends Thread {
 
 	@Override
 	public void run() {
-		while (alive) {
+		while (aliveBoolean.get()) {
 			this.think();
 			this.eat();
 		}
