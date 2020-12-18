@@ -55,7 +55,7 @@ public class Main {
 	}
 	
 	/**
-	 * Starts the simulation with the philosophers, but has a greedy one. People are going to starve, for sure.
+	 * Starts the simulation with three philosophers, but has a greedy one. People are going to starve, for sure.
 	 */
 	private void startGreedy() {
 		
