@@ -90,13 +90,13 @@ public class Philosopher extends Thread {
 		return random.nextInt(max - min) + min;
 	}
 
-	private void cancelStarvation() {
+	protected void cancelStarvation() {
 		if (starvationFuture != null) {
 			starvationFuture.cancel(false);
 		}
 	}
 
-	private void startStarvation() {
+	protected void startStarvation() {
 		Duration starvationDuration = this.getStarvationDuration();
 		starvationFuture = execService.schedule(() -> {
 			System.out.println("WARNING: " + this.toString() + " just died on starvation!");

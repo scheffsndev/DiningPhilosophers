@@ -19,6 +19,9 @@ public class LazyPhilosopher extends Philosopher {
 		System.out.println("Oh no, the lazy one started eating again...");
 		
 		acquireForks();
+		
+		this.cancelStarvation();
+		
 		try {
 			Thread.sleep(EAT_TIME_MAX_MS * EAT_TIME_MULTIPLIER);
 		} catch (InterruptedException e) {
@@ -26,6 +29,8 @@ public class LazyPhilosopher extends Philosopher {
 		} finally {
 			releaseForks();
 		}
+		
+		this.startStarvation();
 		
 		System.out.println("Finally he's done eating. Man, what a nuisance he is!");
 	}
