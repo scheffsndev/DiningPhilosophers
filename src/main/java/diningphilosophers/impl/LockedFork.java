@@ -7,11 +7,12 @@ import diningphilosophers.Fork;
 
 /**
  * This fork will lock itself by using a {@link Lock}
+ * 
  * @author Stefan
  *
  */
 public class LockedFork implements Fork {
-	
+
 	private final Lock lock = new ReentrantLock();
 	private boolean isAvailable = true;
 
@@ -26,7 +27,7 @@ public class LockedFork implements Fork {
 		isAvailable = true;
 		lock.unlock();
 	}
-	
+
 	public boolean isAvailable() {
 		return this.isAvailable;
 	}
