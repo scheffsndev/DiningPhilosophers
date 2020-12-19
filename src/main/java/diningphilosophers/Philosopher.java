@@ -20,6 +20,9 @@ public class Philosopher extends Thread {
 
 	private final Fork leftFork;
 	private final Fork rightFork;
+	
+	private boolean hasLeftFork = false;
+	private boolean hasRightFork = false;
 
 	private AtomicBoolean aliveBoolean = new AtomicBoolean(true);
 	private AtomicBoolean exitRequested = new AtomicBoolean(false);
@@ -72,13 +75,18 @@ public class Philosopher extends Thread {
 	protected void acquireForks() {
 		System.out.println(this.toString() + " just started to acquire resources.");
 
-		leftFork.take();
+		if(!hasLeftFork) {
+			leftFork.take();
+			hasLeftFork = true;
+			System.out.println(this.toString() + " just acquired left fork.");
+		}
 
-		System.out.println(this.toString() + " just acquired left fork.");
+		if(!hasRightFork) {
+			rightFork.take();
+			hasRightFork = true;
+			System.out.println(this.toString() + " just acquired right fork.");			
+		}
 
-		rightFork.take();
-
-		System.out.println(this.toString() + " just acquired right fork.");
 	}
 
 	private Duration getStarvationDuration() {
@@ -86,8 +94,15 @@ public class Philosopher extends Thread {
 	}
 
 	protected void releaseForks() {
-		leftFork.put();
-		rightFork.put();
+		
+		if (hasLeftFork) {
+			leftFork.put();
+			hasLeftFork = false;			
+		}
+		if (hasRightFork) {
+			rightFork.put();
+			hasRightFork = false;			
+		}
 	}
 
 	private int getRandInt(int min, int max) {
@@ -109,24 +124,27 @@ public class Philosopher extends Thread {
 	}
 
 	@Override
-	public void start() {
+	public final void start() {
 		super.start();
 		this.startStarvation();
 	}
 
 	@Override
-	public void run() {
+	public final void run() {
 		while (aliveBoolean.get()) {
 			
 			if (exitRequested.get()) {
-				this.cancelStarvation();
-				System.out.println(this.toString() + " says: I'm done for now. You better pay me decently for all my hard work.");
 				break;
 			}
 			
 			this.think();
 			this.eat();
 		}
+		
+		// Some cleanup.
+		this.cancelStarvation();
+		this.releaseForks();
+		System.out.println(this.toString() + " says: I'm done for now. You better pay me decently for all my hard work.");
 	}
 	
 	public void exitGracefully() {
