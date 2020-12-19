@@ -14,7 +14,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		Main main = new Main();
-		main.startLazy();
+		main.startNormal();
 	}
 
 	private void startNormal() {
@@ -23,11 +23,15 @@ public class Main {
 		table.startSimulation();
 
 		Duration sleepTime = Duration.ofMinutes(3);
+
 		try {
 			Thread.sleep(sleepTime.toMillis());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		table.endSimulation(true);
+		System.exit(0);
 	}
 	
 	/**
@@ -52,6 +56,9 @@ public class Main {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		table.endSimulation(true);
+		System.exit(0);
 	}
 	
 	/**
@@ -76,5 +83,8 @@ public class Main {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		table.endSimulation(true);
+		System.exit(0);
 	}
 }

@@ -72,6 +72,29 @@ public class DiningTable {
 
 		}
 	}
+	
+	/**
+	 * Ends the simulation without blocking the calling thread.
+	 */
+	public void endSimulation() {
+		endSimulation(false);
+	}
+	
+	public void endSimulation(boolean blocking) {
+		for (Philosopher philosopher : philosophers) {
+			philosopher.exitGracefully();
+		}
+		
+		if (blocking) {
+			for (Philosopher philosopher : philosophers) {
+				try {
+					philosopher.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	/**
 	 * Calculates the required number of forks for a certain amount of philosophers.

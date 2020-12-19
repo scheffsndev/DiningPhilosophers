@@ -22,6 +22,7 @@ public class Philosopher extends Thread {
 	private final Fork rightFork;
 
 	private AtomicBoolean aliveBoolean = new AtomicBoolean(true);
+	private AtomicBoolean exitRequested = new AtomicBoolean(false);
 	private ScheduledFuture<?> starvationFuture;
 
 	public Philosopher(Fork leftFork, Fork rightFork) {
@@ -43,6 +44,7 @@ public class Philosopher extends Thread {
 			Thread.sleep(eatTime);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+			return;
 		} finally {
 			releaseForks();
 		}
@@ -61,6 +63,7 @@ public class Philosopher extends Thread {
 			Thread.sleep(thinkTime);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+			return;
 		}
 
 		System.out.println(this.toString() + " just finished thinking.");
@@ -100,7 +103,7 @@ public class Philosopher extends Thread {
 	protected void startStarvation() {
 		Duration starvationDuration = this.getStarvationDuration();
 		starvationFuture = execService.schedule(() -> {
-			System.out.println("WARNING: " + this.toString() + " just died on starvation!");
+			System.out.println("WARNING: " + this.toString() + " just died of starvation!");
 			aliveBoolean.set(false);
 		}, starvationDuration.toMillis(), TimeUnit.MILLISECONDS);
 	}
@@ -114,9 +117,20 @@ public class Philosopher extends Thread {
 	@Override
 	public void run() {
 		while (aliveBoolean.get()) {
+			
+			if (exitRequested.get()) {
+				this.cancelStarvation();
+				System.out.println(this.toString() + " says: I'm done for now. You better pay me decently for all my hard work.");
+				break;
+			}
+			
 			this.think();
 			this.eat();
 		}
+	}
+	
+	public void exitGracefully() {
+		exitRequested.set(true);
 	}
 
 }
